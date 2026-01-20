@@ -1,0 +1,145 @@
+from telegram import Update, ReplyKeyboardMarkup
+from telegram.ext import (
+    ApplicationBuilder,
+    CommandHandler,
+    MessageHandler,
+    ContextTypes,
+    filters
+)
+
+# 🔑 TOKEN
+TOKEN = “8577776496:AAG7dcl5ycP4rZdga8eDzYFRRK297Ft6huo
+"
+
+
+# ===== QUIZ SAVOLLAR =====
+quiz_questions = [
+    {
+        "question": "한국어의 뜻은 무엇입니까?\n\n학생",
+        "options": ["O‘qituvchi", "Talaba", "Kitob", "Maktab"],
+        "answer": "Talaba",
+        "explain": "학생 = talaba\n학(ta’lim) + 생(shaxs)"
+    },
+    {
+        "question": "먹다 so‘zining ma’nosi nima?",
+        "options": ["Ichmoq", "Yemoq", "Borimoq", "Kelmoq"],
+        "answer": "Yemoq",
+        "explain": "먹다 = yemoq (fe’l)"
+    }
+]
+
+
+# ===== /start =====
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data.clear()
+
+    keyboard = [
+        ["🧠 Quiz o‘yin"],
+        ["📘 TOPIK Testlar"],
+        ["📗 Grammatika", "📚 Lug‘at"],
+        ["🎥 Video darslar"],
+        ["ℹ️ Yordam"]
+    ]
+
+    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+
+    await update.message.reply_text(
+        "🇰🇷 Koreys tilini mukammal o‘rganish botiga xush kelibsiz!\n\n"
+        "📌 TOPIK 1–6 testlar\n"
+        "📌 Grammatika tushuntirishlari\n"
+        "📌 Lug‘at va misollar\n"
+        "🧠 Quiz o‘yin\n\n"
+        "Quyidan bo‘lim tanlang 👇",
+        reply_markup=reply_markup
+    )
+
+
+# ===== SAVOL YUBORISH =====
+async def send_question(update, context):
+    index = context.user_data["q_index"]
+    q = quiz_questions[index]
+
+    keyboard = [[opt] for opt in q["options"]]
+    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+
+    await update.message.reply_text(
+        f"❓ Savol {index + 1}\n\n{q['question']}",
+        reply_markup=reply_markup
+    )
+
+
+# ===== XABARLARNI USHLASH =====
+async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    text = update.message.text
+
+    # QUIZ BOSHLASH
+    if text == "🧠 Quiz o‘yin":
+        context.user_data["q_index"] = 0
+        await send_question(update, context)
+        return
+
+    # QUIZ DAVOMI
+    if "q_index" in context.user_data:
+        index = context.user_data["q_index"]
+        q = quiz_questions[index]
+
+        if text == q["answer"]:
+            await update.message.reply_text(
+                f"✅ To‘g‘ri!\n\n📘 Izoh:\n{q['explain']}"
+            )
+        else:
+            await update.message.reply_text(
+                f"❌ Noto‘g‘ri\n\n"
+                f"✅ To‘g‘ri javob: {q['answer']}\n\n"
+                f"📘 Izoh:\n{q['explain']}"
+            )
+
+        context.user_data["q_index"] += 1
+
+        if context.user_data["q_index"] < len(quiz_questions):
+            await send_question(update, context)
+        else:
+            await update.message.reply_text(
+                "🎉 Quiz tugadi!\n\n/start bosib yana boshlashingiz mumkin ✅"
+            )
+            context.user_data.clear()
+        return
+
+    # ===== BOSHQA BO‘LIMLAR =====
+    if text == "📘 TOPIK Testlar":
+        await update.message.reply_text("📘 TOPIK Testlar tez orada qo‘shiladi 🔧")
+
+    elif text == "📗 Grammatika":
+        await update.message.reply_text("📗 Grammatika tez orada qo‘shiladi 📘")
+
+    elif text == "📚 Lug‘at":
+        await update.message.reply_text("📚 Lug‘at tez orada qo‘shiladi 📖")
+
+    elif text == "🎥 Video darslar":
+        await update.message.reply_text("🎥 Video darslar tez orada 🎬")
+
+    elif text == "ℹ️ Yordam":
+        await update.message.reply_text(
+            "ℹ️ Yordam\n\n"
+            "🧠 Quiz o‘yin – savollarga javob berasiz\n"
+            "📘 TOPIK 1–6 – testlar\n"
+            "📗 Grammatika va 📚 Lug‘at mavjud bo‘ladi"
+        )
+
+    else:
+        await update.message.reply_text("Menyudan tanlang 👇")
+
+
+# ===== MAIN =====
+def main():
+    app = ApplicationBuilder().token(TOKEN).build()
+
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+
+    print("Bot ishga tushdi...")
+    app.run_polling()
+
+
+if name == "__main__":
+    main()
