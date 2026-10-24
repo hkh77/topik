@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MasterMind AI</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:sans-serif}
+body{background:linear-gradient(135deg,#1a0033,#000,#001a33);color:#fff;min-height:100vh;padding:20px}
+h1{text-align:center;font-size:32px;background:linear-gradient(90deg,#a855f7,#ec4899,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px}
+.sub{text-align:center;color:#9ca3af;font-size:13px;margin-bottom:20px}
+.bar{max-width:350px;margin:0 auto 20px;background:rgba(255,255,255,.1);height:8px;border-radius:4px;overflow:hidden}
+.fill{height:100%;background:linear-gradient(90deg,#a855f7,#ec4899);width:0;transition:.5s}
+.menu{max-width:800px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px}
+.m{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:16px 8px;text-align:center;cursor:pointer;transition:.2s}
+.m:active{background:rgba(168,85,247,.3);transform:scale(.95)}
+.m div:first-child{font-size:26px;margin-bottom:6px}
+.m div:last-child{font-size:11px;color:#e5e7eb}
+.p{display:none;max-width:800px;margin:0 auto;padding:10px}
+.p.on{display:block}
+.b{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:8px 14px;border-radius:10px;margin-bottom:15px;font-size:13px}
+h2{font-size:22px;margin-bottom:15px;background:linear-gradient(90deg,#a855f7,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+.c{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:14px;cursor:pointer;transition:.2s}
+.c:active{background:rgba(168,85,247,.2)}
+.c div:first-child{font-size:22px;margin-bottom:4px}
+.c div:nth-child(2){font-size:13px;font-weight:600}
+.c div:last-child{font-size:10px;color:#9ca3af;margin-top:2px}
+#chat{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:12px;height:350px;overflow-y:auto;margin-bottom:10px}
+.msg{margin-bottom:10px;padding:9px 13px;border-radius:12px;max-width:85%;font-size:13px;line-height:1.4}
+.u{background:linear-gradient(90deg,#a855f7,#3b82f6);margin-left:auto}
+.a{background:rgba(255,255,255,.1)}
+.row{display:flex;gap:8px}
+input{flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);color:#fff;padding:11px;border-radius:12px;font-size:13px;outline:none}
+input:focus{border-color:#a855f7}
+button{background:linear-gradient(90deg,#a855f7,#3b82f6);border:none;color:#fff;padding:11px 16px;border-radius:12px;font-weight:600;font-size:13px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.s{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:14px;text-align:center}
+.s div:first-child{font-size:22px;font-weight:700;color:#a855f7}
+.s div:last-child{font-size:10px;color:#9ca3af;margin-top:3px}
+#toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:linear-gradient(90deg,#a855f7,#3b82f6);padding:10px 20px;border-radius:10px;font-size:13px;opacity:0;transition:.3s;pointer-events:none}
+#toast.on{opacity:1}
+</style>
+</head>
+<body>
+
+<h1>MasterMind AI</h1>
+<p class="sub">"Kelajagingni AI bilan qur" 🚀</p>
+<div class="bar"><div class="fill" id="xp"></div></div>
+
+<div class="p on" id="p-home">
+<div class="menu">
+<div class="m" onclick="go('ai')"><div>🤖</div><div>AI O'qituvchi</div></div>
+<div class="m" onclick="go('lang')"><div>🌍</div><div>Til Akademiyasi</div></div>
+<div class="m" onclick="go('it')"><div>💻</div><div>IT Akademiyasi</div></div>
+<div class="m" onclick="go('math')"><div>📐</div><div>Matematika</div></div>
+<div class="m" onclick="go('biz')"><div>💼</div><div>Biznes</div></div>
+<div class="m" onclick="go('des')"><div>🎨</div><div>Dizayn</div></div>
+<div class="m" onclick="go('prof')"><div>👤</div><div>Profil</div></div>
+<div class="m" onclick="go('set')"><div>⚙️</div><div>Sozlamalar</div></div>
+</div>
+</div>
+
+<div class="p" id="p-ai">
+<button class="b" onclick="go('home')">← Orqaga</button>
+<h2>🤖 AI O'qituvchi</h2>
+<div id="chat"><div class="msg a">Salom! Savol bering 😊</div></div>
+<div class="row">
+<input id="ci" placeholder="Savolingiz..." onkeypress="if(event.key=='Enter')send()">
+<button onclick="send()">Yubor</button>
+</div>
+</div>
+
+<div class="p" id="p-lang">
+<button class="b" onclick="go('home')">← Orqaga</button>
+<h2>🌍 Tillar</h2>
+<div class="grid" id="g-lang"></div>
+</div>
+
+<div class="p" id="p-it">
+<button class="b" onclick="go('home')">← Orqaga</button>
+<h2>💻 IT</h2>
+<div class="grid" id="g-it"></div>
+</div>
+
+<div class="p" id="p-math">
+<button class="b" onclick="go('home')">← Orqaga</button>
+<h2>📐 Matematika</h2>
+<div class="grid" id="g-math"></div>
+</div>
+
+<div class="p" id="p-biz">
+<button class="b" onclick="go('home')">← Orqaga</button>
+<h2>💼 Biznes</h2>
+<div class="grid" id="g-biz"></div>
+</div>
+
+<div class="p" id="p-des">
+<button class="b" onclick="go('home')">← Orqaga</button>
+<h2>🎨 Dizayn</h2>
+<div class="grid" id="g-des"></div>
+</div>
+
+<div class="p" id="p-prof">
+<button class="b" onclick="go('home')">← Orqaga</button>
+<h2>👤 Profil</h2>
+<div class="stats">
+<div class="s"><div id="pl">1</div><div>Level</div></div>
+<div class="s"><div id="px">0</div><div>XP</div></div>
+<div class="s"><div>0</div><div>Streak</div></div>
+</div>
+</div>
+
+<div class="p" id="p-set">
+<button class="b" onclick="go('home')">← Orqaga</button>
+<h2>⚙️ Sozlamalar</h2>
+<div class="grid">
+<div class="c" onclick="toast('Tez orada!')"><div>🌐</div><div>Til</div><div>O\'zbek</div></div>
+<div class="c" onclick="toast('Tez orada!')"><div>🎨</div><div>Tema</div><div>Dark</div></div>
+<div class="c" onclick="reset()"><div>🔄</div><div>Reset</div><div>XP=0</div></div>
+</div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const L=[["🇺🇿","O'zbek","Ona tili"],["🇬🇧","Ingliz","Xalqaro"],["🇰🇷","Koreys","Osiyo"],["🇷🇺","Rus","MDH"],["🇸🇦","Arab","Diniy"]];
+const I=[["🖥️","Kompyuter","Asos"],["🌐","Internet","Tarmoq"],["📄","HTML","Web"],["🎨","CSS","Dizayn"],["⚡","JS","Interaktiv"],["🐍","Python","Backend"],["☕","Java","Enterprise"],["⚙️","C++","Tizim"],["🗄️","SQL","DB"],["📱","Flutter","Mobile"],["⚛️","React","Frontend"],["🔀","Git","Versiya"],["🐙","GitHub","Loyiha"],["🐳","Docker","Deploy"],["🔒","Security","Xavfsiz"],["🤖","AI Eng","AI"]];
+const M=[["🔢","Boshlang'ich","Arifm"],["📊","Algebra","Tenglama"],["📐","Geometriya","Shakl"],["📏","Trigo","Burchak"],["∫","Calculus","Hosila"],["📈","Stat","Tahlil"]];
+const B=[["🌍","Management","Xalqaro"],["📢","Marketing","Bozor"],["🧾","Accounting","Buxgalter"],["💰","Finance","Moliya"],["👥","HR","Kadr"],["🎯","Leadership","Yetakchi"],["🚀","Entrepreneur","Biznes"]];
+const D=[["🖌️","Grafik","Asos"],["📱","UI/UX","Interfeys"],["🎨","Figma","Prototip"],["🖼️","Photoshop","Rasm"],["✏️","Illustrator","Vektor"],["🧊","Blender","3D"],["🎬","Motion","Animatsiya"]];
+
+let s=JSON.parse(localStorage.mm||'{"xp":0,"lv":1}');
+function save(){localStorage.mm=JSON.stringify(s)}
+function up(){
+document.getElementById('xp').style.width=(s.xp/(s.lv*100)*100)+'%';
+document.getElementById('pl').textContent=s.lv;
+document.getElementById('px').textContent=s.xp;
+}
+function addXp(n){s.xp+=n;while(s.xp>=s.lv*100){s.xp-=s.lv*100;s.lv++;toast('🎉 Level '+s.lv)}save();up()}
+function reset(){if(confirm('Reset?')){s={xp:0,lv:1};save();up();toast('✅ Reset')}}
+function go(p){document.querySelectorAll('.p').forEach(x=>x.classList.remove('on'));document.getElementById('p-'+p).classList.add('on');window.scrollTo(0,0)}
+function rc(id,arr){document.getElementById(id).innerHTML=arr.map(i=>`<div class="c" onclick="lesson('${i[1]}')"><div>${i[0]}</div><div>${i[1]}</div><div>${i[2]}</div></div>`).join('')}
+rc('g-lang',L);rc('g-it',I);rc('g-math',M);rc('g-biz',B);rc('g-des',D);
+function lesson(n){toast('📚 '+n+' — tez orada');addXp(10)}
+async function send(){
+const i=document.getElementById('ci'),t=i.value.trim();
+if(!t)return;
+const c=document.getElementById('chat');
+c.innerHTML+=`<div class="msg u">${t}</div>`;i.value='';
+c.scrollTop=c.scrollHeight;
+const id='l'+Date.now();
+c.innerHTML+=`<div class="msg a" id="${id}">🤔 ...</div>`;
+c.scrollTop=c.scrollHeight;
+await new Promise(r=>setTimeout(r,900));
+const r=["Ajoyib savol! 📚","Mashq qiling 💪","To'g'ri yo'ldasiz ⭐","Yana savol? 😊","Zo'r! +5 XP 🎮"];
+document.getElementById(id).textContent=r[Math.floor(Math.random()*5)];
+addXp(5);c.scrollTop=c.scrollHeight;
+}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2000)}
+up();
+</script>
+</body>
+</html>
